@@ -202,11 +202,15 @@
 					<th></th>
 					<th></th>
 					<th></th>
-				@else
+				@elseif (\Auth::user()->profile_type == "App\Member")
 					<th>Naam</th>
 					<th>Niveau</th>
 					<th>Telefoon ouder(s)</th>
 					<th>Woonplaats</th>
+					<th>Aanmelding</th>
+				@else
+					<th>Naam</th>
+					<th>Niveau</th>
 					<th>Aanmelding</th>
 				@endif
 			</tr>
@@ -214,40 +218,23 @@
 		@endif
 		@foreach($event->participants()->orderBy('voornaam')->get() as $participant)
 			@unless( !(\Auth::user()->is_admin) && !($participant->pivot->geplaatst) )
-			<tr>
-				<td>
-					@if (\Auth::user()->is_admin)
-					<a href="{{ url('/participants', $participant->id) }}">
-					@endif
-						{{ $participant->voornaam }} {{ $participant->tussenvoegsel }} {{ $participant->achternaam }}
-					@if (\Auth::user()->is_admin)
+				<tr>
+				@if (\Auth::user()->is_admin)
+					<td>
+						<a href="{{ url('/participants', $participant->id) }}">
+							{{ $participant->voornaam }} {{ $participant->tussenvoegsel }} {{ $participant->achternaam }}
 						</a>
-					@endif
-				</td>
-				
-				<td>{{ $participant->klas }} {{ $participant->niveau }}</td>
-				
-				@if (\Auth::user()->is_admin)
-				<td>
-					@if ($participantIsNew[$participant->id] == 1)
-						 <span class="glyphicon glyphicon-baby-formula" data-toggle="tooltip" title="Nieuw dit kamp"></span>
-					@endif	
-				</td>
-				
-				<td>{{ $participantCourseString[$participant->id] }}</td>
-				@endif
-
-				@unless (\Auth::user()->is_admin)
-				
-				<td>{{ $participant->telefoon_ouder_vast }}</td>
-				
-				<td>{{ $participant->plaats }}</td>
-				
-				@endunless
-				
-				<td>{{ $participant->pivot->created_at->format('Y-m-d') }}</td>
-				
-				@if (\Auth::user()->is_admin)
+					</td>				
+					<td>{{ $participant->klas }} {{ $participant->niveau }}</td>
+					<td>
+						@if ($participantIsNew[$participant->id] == 1)
+							<span class="glyphicon glyphicon-baby-formula" data-toggle="tooltip" title="Nieuw dit kamp"></span>
+						@endif	
+					</td>
+					
+					<td>{{ $participantCourseString[$participant->id] }}</td>			
+					<td>{{ $participant->pivot->created_at->format('Y-m-d') }}</td>
+					
 					<td>
 					@unless ($participant->pivot->datum_betaling == '0000-00-00') 
 						{{ substr($participant->pivot->datum_betaling,0,4) .'-'.substr($participant->pivot->datum_betaling,5,2).'-'.substr($participant->pivot->datum_betaling,8,2) }}
@@ -255,7 +242,7 @@
 						<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" data-toggle="tooltip" title="Deze deelnemer heeft nog niet betaald!"></span> 
 					@endunless
 					</td>
-					
+						
 					<td>
 						@unless ($participant->inkomen == 0)
 							@if ($participant->inkomensverklaring != null)
@@ -275,9 +262,23 @@
 					<td><a href="{{ url('/events', [$event->id, 'move-participant', $participant->id]) }}"><span class="glyphicon glyphicon-arrow-right" aria-hidden="true" data-toggle="tooltip" title="Verplaatsen naar ander kamp"></span></a></td>
 
 					<td><a href="{{ url('/events', [$event->id, 'remove-participant', $participant->id]) }}"><span class="glyphicon glyphicon-remove" aria-hidden="true" data-toggle="tooltip" title="Inschrijving verwijderen"></span></a></td>
+				@elseif (\Auth::user()->profile_type == "App\Member")
+					<td>
+						{{ $participant->voornaam }} {{ $participant->tussenvoegsel }} {{ $participant->achternaam }}
+					</td>
+					<td>{{ $participant->klas }} {{ $participant->niveau }}</td>
+					<td>{{ $participant->telefoon_ouder_vast }}</td>	
+					<td>{{ $participant->plaats }}</td>
+					<td>{{ $participant->pivot->created_at->format('Y-m-d') }}</td>
+				@else
+				<td>
+					{{ $participant->voornaam }} {{ $participant->tussenvoegsel }} {{ strtoupper(substr($participant->achternaam, 0, 1)) }}
+				</td>
+				<td>{{ $participant->klas }} {{ $participant->niveau }}</td>
+				<td>{{ $participant->pivot->created_at->format('Y-m-d') }}</td>
 				@endif
-			</tr>
 			@endunless
+			</tr>
 		@endforeach
 	</table>
 @endif

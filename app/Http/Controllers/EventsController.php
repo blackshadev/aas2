@@ -97,7 +97,6 @@ class EventsController extends Controller {
 		$showAll = true;
 		if (\Auth::user()->profile_type == "App\Participant" && !($profile->events()->find($event->id)->pivot->geplaatst) ) {
 			$showAll = false;
-			
 		}
 		
 		// Check number of participants to show
